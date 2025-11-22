@@ -5,9 +5,9 @@ import Title from '@/components/ui/title';
 import type { Task } from '@/constants/types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
-import * as Location from 'expo-location'; // <- importo expo-location
+import * as Location from 'expo-location';
 import React, { useEffect, useState } from 'react';
-import { Image, Modal, Pressable, StyleSheet, Text, View, Linking } from 'react-native';
+import { Image, Linking, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useUser } from '../../contexts/UserContext';
 
@@ -225,29 +225,40 @@ export default function HomeScreen() {
     Linking.openURL(url).catch(err => console.error('No se pudo abrir Maps', err));
   };
 
-  // Esta función agrega una nueva tarea al final de la lista, ahora con ubicación
-  const addTask = async (title: string) => {
+  // Hago addTask síncrono en la interfaz, y dejo la obtención de ubicación como mejor esfuerzo
+  const addTask = (title: string) => {
     // No permito tareas vacías
     if (!title.trim()) return;
 
-    // Intento obtener la ubicación actual (si falla, sigo sin ubicación)
-    const location = await getCurrentLocation();
+    // Guardo la foto actual en una variable local para que no se pierda
+    const currentPhotoUri = selectedPhotoUri;
 
-    const newTask: Task = {
-      id: (todos.length + 1).toString(),
+    // Creo la tarea primero (sin bloquear la UI)
+    const baseTask: Task = {
+      id: Date.now().toString(), // id único basado en timestamp
       title: title.trim(),
       completed: false,
       userEmail: user?.email,
-      // Aquí realmente asocio la foto tomada a la tarea
-      photoUri: selectedPhotoUri,
-      // Guardo la ubicación solo si la pude obtener
-      location,
+      photoUri: currentPhotoUri, // uso la copia local de la foto
     };
 
-    setTodos(prev => [...prev, newTask]);
+    // Agrego la tarea inmediatamente al estado para que se vea al instante
+    setTodos(prev => [...prev, baseTask]);
     setNewTaskTitle('');
-    // Limpio la foto para que la siguiente tarea no herede esta imagen
+    // Limpio la foto para la siguiente tarea
     setSelectedPhotoUri(undefined);
+
+    // Luego, en segundo plano, intento obtener ubicación y actualizar esa tarea
+    (async () => {
+      const location = await getCurrentLocation();
+      if (!location) return;
+
+      setTodos(prev =>
+        prev.map(t =>
+          t.id === baseTask.id ? { ...t, location } : t,
+        ),
+      );
+    })();
   };
 
   return (

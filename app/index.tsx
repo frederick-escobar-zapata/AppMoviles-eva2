@@ -3,15 +3,15 @@
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  StyleSheet,
-  Text,
-  TextInput,
-  View
+    StyleSheet,
+    Text,
+    TextInput,
+    View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomButton from '../components/CustomButton';
-import { useUser } from '../contexts/UserContext';
 import ErrorMessage from '../components/ui/ErrorMessage';
+import { useUser } from '../contexts/UserContext';
 
 export default function LoginScreen() {
   // Estado para guardar el email que escribe el usuario

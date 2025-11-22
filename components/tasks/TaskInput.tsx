@@ -1,7 +1,7 @@
+import IconButton from '@/components/ui/IconButton';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
-import IconButton from '@/components/ui/IconButton';
 
 interface TaskInputProps {
   value: string;
