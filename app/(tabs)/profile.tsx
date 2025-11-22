@@ -1,10 +1,16 @@
+import { router } from 'expo-router';
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useUser } from '../../contexts/UserContext';
 
 export default function ProfileScreen() {
-  const { user } = useUser();
+  const { user, setUser } = useUser();
+
+  const handleLogout = () => {
+    setUser(null);
+    router.replace('/');
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -12,6 +18,9 @@ export default function ProfileScreen() {
         <Text style={styles.title}>Perfil</Text>
         <Text style={styles.label}>Email:</Text>
         <Text style={styles.email}>{user?.email || 'No disponible'}</Text>
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <Text style={styles.logoutButtonText}>Cerrar sesión</Text>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
@@ -43,5 +52,18 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#007AFF',
     fontWeight: '500',
+    marginBottom: 32,
+  },
+  logoutButton: {
+    marginTop: 16,
+    backgroundColor: '#FF3B30',
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  logoutButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
