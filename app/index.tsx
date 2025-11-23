@@ -1,128 +1,152 @@
-import { router } from 'expo-router';
-import React, { useState } from 'react';
+import { router } from "expo-router";
+import React, { useState } from "react";
 import {
-  StyleSheet,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
   Text,
   TextInput,
-  View
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import CustomButton from '../components/CustomButton';
-import { useUser } from '../contexts/UserContext';
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import CustomButton from "../components/CustomButton";
+import { indexStyles } from "../components/styles/indexStyles";
+import { useUser } from "../contexts/UserContext";
 
 export default function LoginScreen() {
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [errorMessage, setErrorMessage] = useState<string>('');
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setUser } = useUser();
 
-  const handleLogin = () => {
-    setErrorMessage(''); // Limpiar errores previos
-    
+  const handleLogin = async () => {
+    setErrorMessage(""); // Limpiar errores previos
+
     if (!email.trim()) {
-      setErrorMessage('Por favor ingresa tu email');
+      setErrorMessage("Por favor ingresa tu email");
       return;
     }
 
-    if (password !== '1234') {
-      setErrorMessage('Credenciales inválidas');
+    if (!password.trim()) {
+      setErrorMessage("Por favor ingresa tu contraseña");
       return;
     }
+    if (password !== "1234") {
+      setErrorMessage("Credenciales inválidas");
+      return;
+    }
+    setIsLoading(true); // Simular carga
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      // esto es crucial para actualizar el contexto del usuario
+      setUser({ email: email.trim() });
 
-    // Guardar usuario en el context y navegar a tabs
-    setUser({ email: email.trim() });
-    router.replace('/(tabs)/home');
+      // Navegar a la pantalla principal
+      router.replace("/(tabs)/home");
+    } catch (error) {
+      setErrorMessage("Error al iniciar sesión");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  const handleForgotPassword = () => {
+    Alert.alert("Recuperar Contraseña", "¿Deseas recuperar tu contraseña?", [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Recuperar",
+        onPress: () => console.log("Recuperar contrasena"),
+      },
+    ]);
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.loginContainer}>
-        <Text style={styles.title}>Iniciar Sesión</Text>
-        
-        {errorMessage ? (
-          <View style={styles.errorContainer}>
-            <Text style={styles.errorText}>{errorMessage}</Text>
+    <SafeAreaView style={indexStyles.container}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={indexStyles.KeyboardAvoidingView}
+      >
+        <ScrollView
+          contentContainerStyle={indexStyles.scrollContainer}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={indexStyles.header}>
+            <View style={indexStyles.logoContainer}>
+              <Text style={indexStyles.logoText}>Tonic</Text>
+            </View>
+            <Text style={indexStyles.welcomeText}>Bienvenido de nuevo</Text>
+            <Text style={indexStyles.subtitle}>Inicia sesión</Text>
           </View>
-        ) : null}
-        
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Email</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Ingresa tu email"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
-        </View>
 
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Password</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Ingresa tu contraseña"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry={true}
-          />
-        </View>
-
-        <CustomButton 
-          title="Iniciar Sesión" 
-          onPress={handleLogin} 
-        />
-      </View>
+          <View style={indexStyles.formContainer}>
+            {errorMessage ? ( // Mostrar mensaje de error si existe
+              <View style={indexStyles.errorContainer}>
+                <Text style={indexStyles.errorText}>{errorMessage}</Text>
+              </View>
+            ) : null}
+            {/* Comenzamos con los campos de ingreso de datos */}
+            {/* Campo Email */}
+            <View style={indexStyles.inputContainer}>
+              <Text style={indexStyles.label}>Email</Text>
+              <TextInput
+                style={indexStyles.input}
+                placeholder="tonic@email.com"
+                placeholderTextColor={"#9CA3AF"}
+                value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                autoComplete="email"
+              />
+            </View>
+            {/* Campo contrasena */}
+            <View style={indexStyles.inputContainer}>
+              <Text style={indexStyles.label}>Contraseña</Text>
+              <TextInput
+                style={indexStyles.input}
+                placeholder="******"
+                placeholderTextColor={"#9CA3AF"}
+                secureTextEntry
+                value={password}
+                onChangeText={setPassword}
+              />
+            </View>
+            {/* olvide contrasena */}
+            <TouchableOpacity
+              style={indexStyles.forgotPasswordContainer}
+              onPress={handleForgotPassword}
+            >
+              <Text style={indexStyles.forgotPasswordText}>
+                ¿Olvidaste tu contraseña?
+              </Text>
+            </TouchableOpacity>
+            {/* boton de login */}
+            <CustomButton
+              title={isLoading ? "Cargando..." : "Iniciar Sesión"}
+              onPress={handleLogin}
+              disabled={isLoading}
+              style={indexStyles.loginButton}
+            />
+            {/* separador */}
+            <View style={indexStyles.separatorContainer}>
+              <View style={indexStyles.separatorLine} />
+              <Text style={indexStyles.separatorText}>O</Text>
+              <View style={indexStyles.separatorLine} />
+            </View>
+            {/* boton de registro */}
+            <TouchableOpacity
+              style={indexStyles.registerButton}
+              onPress={() => console.log("Navega a registro")}
+            >
+              <Text style={indexStyles.registerButtonText}>
+                ¿No tienes una cuenta?{" "}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  loginContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 20,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 40,
-    color: '#333',
-  },
-  inputContainer: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 8,
-    color: '#555',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    backgroundColor: '#fff',
-  },
-  errorContainer: {
-    backgroundColor: '#ffebee',
-    borderColor: '#f44336',
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 20,
-  },
-  errorText: {
-    color: '#f44336',
-    fontSize: 14,
-    textAlign: 'center',
-    fontWeight: '500',
-  },
-});
