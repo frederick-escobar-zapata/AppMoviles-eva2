@@ -178,8 +178,10 @@ constants/
 
 ## 👨‍💻 Desarrollado por
 
-**Bastian Ceron**    
+**Bastian Ceron**
+
 **Gonzalo Croft**
+
 **Frederick Escobar**  
 
 
