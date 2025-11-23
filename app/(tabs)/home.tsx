@@ -1,36 +1,24 @@
-<<<<<<< HEAD
-import { homeStyles as styles } from "@/components/styles/homeStyles";
-import TaskItem from "@/components/task-item";
-import Title from "@/components/ui/title";
-import { Ionicons } from "@expo/vector-icons"; // <--- usar Ionicons
-import { router } from "expo-router";
-import React, { useEffect, useState } from "react";
-import {
-  Alert,
-  TextInput,
-  TouchableOpacity,
-  View
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useUser } from "../../contexts/UserContext";
-
-const INITIAL_TODOS = [
-  { id: "1", title: "Comprar víveres", completed: false },
-  { id: "2", title: "Llevar el auto al taller", completed: false },
-  { id: "3", title: "Preparar presentación para el trabajo", completed: false },
-  { id: "4", title: "Hacer ejercicio por la tarde", completed: false },
-  { id: "5", title: "Leer un capítulo del libro", completed: false },
-=======
-// En esta pantalla muestro el saludo al usuario logueado y la lista de tareas.
 import TaskInput from '@/components/tasks/TaskInput';
 import TaskList from '@/components/tasks/TaskList';
 import Title from '@/components/ui/title';
 import type { Task } from '@/constants/types';
+import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
+import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Image, Linking, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  Alert,
+  Image,
+  Linking,
+  Modal,
+  Pressable,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useUser } from '../../contexts/UserContext';
 
@@ -41,47 +29,49 @@ const INITIAL_TODOS: Task[] = [
   { id: '3', title: 'Preparar presentación para el trabajo', completed: false },
   { id: '4', title: 'Hacer ejercicio por la tarde', completed: false },
   { id: '5', title: 'Leer un capítulo del libro', completed: false },
->>>>>>> 07769ea1611b4ae311bc5a1dfc40eaacaf64fd0d
 ];
 
 // Función auxiliar para construir la clave de almacenamiento por usuario
 function getTasksStorageKey(email: string) {
-  // Uso el email en la clave para separar las tareas por usuario
   return `tasks_${email}`;
 }
 
 export default function HomeScreen() {
-<<<<<<< HEAD
   const { user, setUser } = useUser();
-  const [welcomeMessage, setWelcomeMessage] = useState<string>("Cargando...");
-  const [todos, setTodos] = useState(INITIAL_TODOS);
-  const [newTaskTitle, setNewTaskTitle] = useState<string>(""); // <- NUEVO ESTADO
-=======
-  // Obtengo el usuario actual desde el contexto
-  const { user } = useUser();
-  // Mensaje de bienvenida que simulo cargar con un pequeño delay
   const [welcomeMessage, setWelcomeMessage] = useState<string>('Cargando...');
-  // Estado con la lista de tareas (las lleno desde AsyncStorage o con las iniciales)
   const [todos, setTodos] = useState<Task[]>([]);
-  // Estado para manejar el texto de la nueva tarea a agregar
   const [newTaskTitle, setNewTaskTitle] = useState<string>('');
-  // Estado para guardar la foto seleccionada para la próxima tarea
   const [selectedPhotoUri, setSelectedPhotoUri] = useState<string | undefined>(undefined);
-
-  // Estado para el modal de imagen
   const [imageModalVisible, setImageModalVisible] = useState(false);
   const [imageModalUri, setImageModalUri] = useState<string | undefined>(undefined);
-
-  // Estado para permisos de ubicación (solo para saber si tengo o no)
   const [locationPermissionStatus, setLocationPermissionStatus] = useState<Location.PermissionStatus | null>(null);
->>>>>>> 07769ea1611b4ae311bc5a1dfc40eaacaf64fd0d
+
+  // Función para cerrar sesión
+  const handleLogout = () => {
+    Alert.alert(
+      'Cerrar Sesión',
+      '¿Estás seguro de que quieres cerrar sesión?',
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+        {
+          text: 'Cerrar Sesión',
+          style: 'destructive',
+          onPress: () => {
+            setUser(null);
+            router.replace('/');
+          },
+        },
+      ]
+    );
+  };
 
   useEffect(() => {
-    // Simulo una carga inicial del mensaje de bienvenida
     const timer = setTimeout(() => {
-      setWelcomeMessage("¡Bienvenido! ");
+      setWelcomeMessage('¡Bienvenido! ');
     }, 1000);
-    // Limpio el timer cuando el componente se desmonte
     return () => clearTimeout(timer);
   }, []);
 
@@ -100,20 +90,16 @@ export default function HomeScreen() {
   // Cuando tengo un usuario con email, intento cargar sus tareas desde AsyncStorage
   useEffect(() => {
     const loadTasksForUser = async () => {
-      // Si todavía no tengo email, no hago nada
       if (!user?.email) return;
 
       try {
         const storageKey = getTasksStorageKey(user.email);
-        // Leo las tareas guardadas para este usuario
         const stored = await AsyncStorage.getItem(storageKey);
 
         if (stored) {
-          // Si encontré tareas guardadas, las parseo desde JSON
           const parsed: Task[] = JSON.parse(stored);
           setTodos(parsed);
         } else {
-          // Si no hay nada guardado, uso las tareas iniciales asociadas al usuario
           const initialTasksForUser: Task[] = INITIAL_TODOS.map(task => ({
             ...task,
             userEmail: user.email,
@@ -121,7 +107,6 @@ export default function HomeScreen() {
           setTodos(initialTasksForUser);
         }
       } catch (error) {
-        // Si algo falla al leer, muestro un log y al menos cargo las tareas iniciales
         console.error('Error cargando tareas desde AsyncStorage', error);
         if (user?.email) {
           const fallbackTasks: Task[] = INITIAL_TODOS.map(task => ({
@@ -139,19 +124,16 @@ export default function HomeScreen() {
   // Cada vez que cambian las tareas y tengo un usuario, las guardo en AsyncStorage
   useEffect(() => {
     const saveTasksForUser = async () => {
-      // Solo guardo si tengo usuario con email
       if (!user?.email) return;
 
       try {
         const storageKey = getTasksStorageKey(user.email);
-        // Convierto las tareas a JSON y las guardo
         await AsyncStorage.setItem(storageKey, JSON.stringify(todos));
       } catch (error) {
         console.error('Error guardando tareas en AsyncStorage', error);
       }
     };
 
-    // Evito guardar al inicio cuando todavía no se han cargado tareas
     if (todos.length > 0 || user?.email) {
       saveTasksForUser();
     }
@@ -160,7 +142,6 @@ export default function HomeScreen() {
   // Función auxiliar para obtener ubicación actual
   const getCurrentLocation = async (): Promise<{ latitude: number; longitude: number } | undefined> => {
     try {
-      // Si no tengo permisos, intento pedirlos una vez más
       if (locationPermissionStatus !== 'granted') {
         const { status } = await Location.requestForegroundPermissionsAsync();
         setLocationPermissionStatus(status);
@@ -181,32 +162,28 @@ export default function HomeScreen() {
     }
   };
 
-  // Tomo una foto con la cámara del sistema y guardo su URI para la próxima tarea
+  // Tomo una foto con la cámara del sistema
   const handleTakePhoto = async () => {
-    // Pido permisos a través de image-picker (cámara del sistema)
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== 'granted') {
       console.warn('Permiso de cámara denegado');
       return;
     }
 
-    // Abro la cámara del sistema
     const result = await ImagePicker.launchCameraAsync({
       allowsEditing: true,
       quality: 0.7,
     });
 
-    // Si el usuario canceló, no hago nada
     if (result.canceled) return;
 
-    // Tomo la uri de la foto capturada
     const uri = result.assets[0]?.uri;
     if (uri) {
       setSelectedPhotoUri(uri);
     }
   };
 
-  // Nuevo: elegir una foto desde la galería y guardarla para la próxima tarea
+  // Elegir una foto desde la galería
   const handlePickFromGallery = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
@@ -227,20 +204,14 @@ export default function HomeScreen() {
     }
   };
 
-  // Esta función invierte el estado completed de una tarea según su id
   const toggleTask = (id: string) => {
     setTodos((prev) =>
       prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t))
     );
   };
 
-  // Esta función elimina una tarea filtrando por id
   const removeTask = (id: string) => {
-<<<<<<< HEAD
-    setTodos((prev) => prev.filter((t) => t.id !== id));
-=======
     setTodos(prev => prev.filter(t => t.id !== id));
->>>>>>> 07769ea1611b4ae311bc5a1dfc40eaacaf64fd0d
   };
 
   // Abrir el modal con la imagen de una tarea
@@ -250,7 +221,7 @@ export default function HomeScreen() {
     setImageModalVisible(true);
   };
 
-  // NUEVO: abrir ubicación de la tarea en Google Maps
+  // Abrir ubicación de la tarea en Google Maps
   const openTaskLocation = (location?: { latitude: number; longitude: number }) => {
     if (!location) return;
     const { latitude, longitude } = location;
@@ -258,48 +229,24 @@ export default function HomeScreen() {
     Linking.openURL(url).catch(err => console.error('No se pudo abrir Maps', err));
   };
 
-  // Hago addTask síncrono en la interfaz, y dejo la obtención de ubicación como mejor esfuerzo
   const addTask = (title: string) => {
-    // No permito tareas vacías
     if (!title.trim()) return;
 
-    // Guardo la foto actual en una variable local para que no se pierda
     const currentPhotoUri = selectedPhotoUri;
 
-    // Creo la tarea primero (sin bloquear la UI)
     const baseTask: Task = {
-      id: Date.now().toString(), // id único basado en timestamp
+      id: Date.now().toString(),
       title: title.trim(),
       completed: false,
       userEmail: user?.email,
-      photoUri: currentPhotoUri, // uso la copia local de la foto
+      photoUri: currentPhotoUri,
     };
-<<<<<<< HEAD
-    setTodos((prev) => [...prev, newTask]);
-    setNewTaskTitle(""); // limpiar input
-  };
-  const handleLogout = () => {
-    Alert.alert("Cerrar sesión", "¿Estás seguro de que deseas cerrar sesión?", [
-      { text: "Cancelar", style: "cancel" },
-      {
-        text: "Cerrar sesión",
-        style: "destructive",
-        onPress: () => {
-          // Lógica para cerrar sesión
-          setUser(null);
-          router.replace("/"); // Redirigir a la pantalla de login
-        },
-      },
-    ]);
-=======
 
-    // Agrego la tarea inmediatamente al estado para que se vea al instante
     setTodos(prev => [...prev, baseTask]);
     setNewTaskTitle('');
-    // Limpio la foto para la siguiente tarea
     setSelectedPhotoUri(undefined);
 
-    // Luego, en segundo plano, intento obtener ubicación y actualizar esa tarea
+    // Obtener ubicación en segundo plano
     (async () => {
       const location = await getCurrentLocation();
       if (!location) return;
@@ -310,30 +257,29 @@ export default function HomeScreen() {
         ),
       );
     })();
->>>>>>> 07769ea1611b4ae311bc5a1dfc40eaacaf64fd0d
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Encabezado con el mensaje de bienvenida y el email del usuario */}
+      {/* Header con título y botón de cerrar sesión */}
       <View style={styles.header}>
         <View style={styles.headerContent}>
           <Title style={styles.welcomeTitle}>
             {welcomeMessage}
             {user?.email && (
-              <Title style={styles.welcomeEmail}>{user.email}</Title>
+              <Text style={styles.welcomeEmail}>{user.email}</Text>
             )}
-            </Title>
-            <TouchableOpacity
+          </Title>
+          <TouchableOpacity 
             style={styles.logoutButton}
             onPress={handleLogout}
-            >
-          <Ionicons name="log-out-outline" size={24} color={'#6B7280'}/>
-            </TouchableOpacity>
+          >
+            <Ionicons name="log-out-outline" size={24} color="#6B7280" />
+          </TouchableOpacity>
         </View>
       </View>
 
-      {/* Input de nueva tarea componetizado */}
+      {/* Input para nueva tarea */}
       <TaskInput
         value={newTaskTitle}
         onChangeText={setNewTaskTitle}
@@ -343,17 +289,16 @@ export default function HomeScreen() {
         hasSelectedPhoto={!!selectedPhotoUri}
       />
 
-      {/* Lista de tareas componetizada */}
+      {/* Lista de tareas */}
       <TaskList
         tasks={todos}
         onToggle={toggleTask}
         onRemove={removeTask}
         onViewImage={viewTaskImage}
-        // pasamos la función para abrir ubicación
         onViewLocation={openTaskLocation}
       />
 
-      {/* Modal para mostrar la imagen en grande */}
+      {/* Modal para mostrar imagen */}
       <Modal
         visible={imageModalVisible}
         transparent
@@ -380,65 +325,39 @@ export default function HomeScreen() {
       </Modal>
     </SafeAreaView>
   );
-<<<<<<< HEAD
-}
-=======
 }
 
 const styles = StyleSheet.create({
-  // Estilos generales del contenedor de la pantalla Home
   container: {
     flex: 1,
     padding: 16,
     backgroundColor: '#F2F6FF',
   },
-  // Margen para separar el header del resto del contenido
   header: {
     marginTop: 8,
     marginBottom: 24,
   },
-  // Estos estilos se usaron para variaciones de texto, los mantengo por si los reutilizo
-  welcomeTitle: {
-    fontSize: 26,
-    fontWeight: '700',
-    color: '#1F2933',
-    marginBottom: 4,
+  headerContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
-  welcomeSubtitle: {
-    fontSize: 16,
-    color: '#52606D',
+  welcomeTitle: {
+    fontSize: 20,
+    flex: 1,
+    marginRight: 12,
   },
   welcomeEmail: {
     fontWeight: '600',
     color: '#3B82F6',
   },
-  section: {
-    marginTop: 8,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#1F2933',
-    marginBottom: 12,
-  },
-  // Contenedor tipo “card” para agrupar tareas (si quisiera usarlo luego)
-  tasksCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 16,
+  logoutButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: '#F3F4F6',
     borderWidth: 1,
-    borderColor: '#E1E7F0',
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
+    borderColor: '#E5E7EB',
   },
-  tasksPlaceholder: {
-    fontSize: 14,
-    color: '#6B7280',
-  },
-  // Estilos del modal de imagen
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.55)',
@@ -472,4 +391,3 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 });
->>>>>>> 07769ea1611b4ae311bc5a1dfc40eaacaf64fd0d
