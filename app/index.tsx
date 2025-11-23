@@ -46,7 +46,8 @@ export default function LoginScreen() {
 
       // Navegar a la pantalla principal
       router.replace("/(tabs)/home");
-    } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (_error) {
       setErrorMessage("Error al iniciar sesión");
     } finally {
       setIsLoading(false);
