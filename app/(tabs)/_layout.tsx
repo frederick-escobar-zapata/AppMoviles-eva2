@@ -20,27 +20,11 @@ export default function TabLayout() {
         options={{
           title: "Inicio",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons
-              name="home"
-              color={color}
-              size={size}
-            />
+            <Ionicons name="home" size={size} color={color} />
           ),
         }}
       />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: "Perfil",
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? "person" : "person-outline"}
-              color={color}
-              size={24}
-            />
-          ),
-        }}
-      />
+      {/* Añade más tabs si necesitas */}
     </Tabs>
   );
 }
